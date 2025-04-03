@@ -1,0 +1,147 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Príncipios de Localidade na Cache: Impacto de Técnicas e Arquiteturas na Performance.\\
+
+}
+
+\author{\IEEEauthorblockN{Gabriel Araujo Campos Silva}
+\IEEEauthorblockA{\textit{Pontifícia Universidade Católica de Minas Gerais}}
+\and
+\IEEEauthorblockN{Gabriel Rangel}
+\IEEEauthorblockA{\textit{Pontifícia Universidade Católica de Minas Gerais}}}
+
+\maketitle
+
+\section{Introdução}
+A memória cache é um componente de Hardware de computadores que armazena dados/instruções e tem rápido tempo de acesso, apesar de seu espaço ser reduzido. Para extrair o máximo de eficiência dessa memória, existem diversas técnicas capazes de otimizar sua performance.
+
+A performance de uma memória Cache é medida através do cache miss, que é uma métrica para mensurar quantas vezes a informação que o processador necessita estava armazenada. É importante ressaltar que cada vez que um dado não é encontrado na Cache, ocorre um acesso às demais memórias, que consequentemente gastam mais tempos para fazer essa busca.
+
+De acordo com Patterson e Hennessy \cite{patterson2017}, a localidade temporal é o princípio em que se um local de dados é referencado, então, ele tenderá aa ser referenciado novamente em breve. Enquanto a localidade espacial é o princípio em que, se um local de dados é referenciado, então, os próximos dados com endereços próximos tenderão a ser referenciados em breve.
+
+Para explorar as os conceitos de localidade, existem diferentes arquiteturas que possibilitam mapear a memória de forma a diminuir ou aumentar a quantidade de substituições que serão feitas ao longo de uma execução. Além disso, os princípios também podem ser analisados de acordo com as políticas de substituição de um dado na memória. Por fim, o tamanho dos blocos e das palavras também interfere na performance e pode perturbar o melhor uso das localidades.
+
+O trabalho apresenta a comparação entre diversas técnicas de substituição, como LRU (Least Recently Used), LFU (Least Frequently Used) e FIFO (First In First Out), além de diferentes arquiteturas de memória, como Mapeamento Direto, Associativa por conjuntos e Completamente Associativa, e como cada alteração impacta o cache miss através de uma análise sobre o funcionamento de cada, comparação entre todos e simulação do funcionamento da memória através do simulador Amnesia.
+
+\section{Trabalhos Correlatos}
+Como embasamento desse trabalho, foram utilizados os seguintes artigos e pesquisas relacionadas:
+\subsection{"Amnesia: um Objeto de Aprendizagem para o Ensino de Hierarquia de Memória" - Instituto de Ciências Matemáticas e de Computação – ICMC/USP}
+Esse artigo explica o funcionamento do simulador Amnesia, ferramenta principal utilizada para testes de memória nesse trabalho. O documento aborda o projeto Amnesia e sua principal funcionalidade: permitir analisar o desempenhoi da hierarquia  de memória na arquitetura de Von Neumann, simulando desde o processador até as caches, memória principal e disco (caso o objeto de estudo seja a memória virtual). Esse artigo também apresenta um tutorial de como utilizar a ferramenta, além de resultados de estatísticas geradas pelo próprio simulador.
+
+\subsection{"Avanços na Arquitetura de Memória Cache" - UNESP - IBILCE}
+O artigo traz uma visão mais teórica a respeito da hierarquia de memória, dando ênfase em diversas arquiteturas reais de processadores e comparando a evolução das memórias ao longo do tempo. Não obstante, o trabalho apresenta um detalhamento teórico importante para o entendimento do processo de hierarquia de memória, além de oferecer embasamento teórico de conceitos importantes para essa pesquisa.
+
+\subsection{"Aprendendo Hierarquia de Mem´oria e a Explorac¸˜aodas Localidades Espacial e Temporal com o Simulador Amnesia" - Pontif´ıcia Universidade Cat´olica de Minas Gerais}
+O artigo aborda a importância do simulador Amnesia para o estudo da hierarquia de memória, e além disso, trabalha diversos conceitos essenciais para o entendimento do trabalho. Também apresenta pontos importantes para serem analisados no estudo da memória Cache, como tamanho da cache, tamanho do bloco por conjunto e níveis de associatividade. Além disso, sugere diversos casos de teste para o estudo da performance da memória e os devidos resultados, que foram utilizados como referência para pensar nos testes desse trabalho.
+
+Além das pesquisas e artigos citados acima, outras referências foram utilizadas principalmente para melhorar o entendimento de conceitos teóricos como localidade espacial e temporal, e com isso, refinar os testes e resultados desse trabalho.
+
+\section{Metodologia}
+Para o desenvolvimento desse trabalho, adotamos algumas etapas importantes, afim de garantir a qualidade das informações e o entendimento do conteúdo por todos os membros do grupo. Em primeiro lugar, artigos relacionados foram levantados, assim como bibliografias de maior tamanho, e após a leitura de todo o material, os principais são utilizados como referências nessa pesquisa.
+
+Após o entendimento do conteúdo que seria abordado, foi realizado um estudo sobre o funcionamento do simulador Amnesia. O simulador utiliza dois componentes principais para gerar os dados necessários para o trabalho: arquitetura e trace. A arquitetura do processador é passada ao simulador por meio de um arquivo XML, e possui os seguintes campos:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|}
+\hline
+\textbf{Campo} \\ \hline
+processorContains \\ \hline
+createTraceFile \\ \hline
+wordSize (Trace) \\ \hline
+wordSize (CPU) \\ \hline
+blockSize \\ \hline
+memorySize (MainMemory) \\ \hline
+ciclesPerAccessRead (MainMemory) \\ \hline
+ciclesPerAccessWrite (MainMemory) \\ \hline
+timeCicle (MainMemory) \\ \hline
+cacheType \\ \hline
+lineSize \\ \hline
+ciclesPerAccessRead (Cache) \\ \hline
+ciclesPerAccessWrite (Cache) \\ \hline
+timeCicle (Cache) \\ \hline
+memorySize (Cache) \\ \hline
+associativityLevel \\ \hline
+writePolicy \\ \hline
+replacementAlgorithm (Cache) \\ \hline
+pageSize \\ \hline
+diskMemorySize \\ \hline
+diskCiclesPerAccessRead \\ \hline
+diskCiclesPerAccessWrite \\ \hline
+timeCicle (VirtualMemory) \\ \hline
+pageTableReplacementAlgorithm \\ \hline
+TLBType \\ \hline
+memorySize (TLB) \\ \hline
+ciclesPerAccessRead (TLB) \\ \hline
+ciclesPerAccessWrite (TLB) \\ \hline
+timeCicle (TLB) \\ \hline
+replacementAlgorithm (TLB) \\ \hline
+\end{tabular}
+\caption{Tabela contendo apenas os campos extraídos do XML.}
+\label{tab:xmlcampos}
+\end{table}
+
+Sendo que cada campo é uma característica da memória que pode ser alterada a fim de validar alguma hipótese e realizar os testes. Por exemplo, o campo replacementAlgorithm diz respeito a política de substituição no caso de algum conflito de endereços na Cache.
+
+Já o arquivo de trace é responsável por testar a arquitetura proposta, contendo acessos realizados por um programa à memória, acessos de leitura, escrita de dados ou busca de instruções. O mesmo é composto por várias linhas, sendo que cada uma contém um rótulo(decimal) e um endereço(hexadecimal). Através do arquivo de traço é possível gerar estatísticas sobre a memória.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\hline
+\multicolumn{3}{l}{\textbf{Trace 1}} \\ \hline
+2 & 5 & // busca de instrução no endereço 5 \\ 
+2 & c & // busca de instrução no endereço c \\ 
+2 & b & // busca de instrução no endereço b \\ 
+2 & a & // busca de instrução no endereço a \\ 
+2 & f & // busca de instrução no endereço f \\ 
+2 & 8 & // busca de instrução no endereço 8 \\ 
+2 & 0 & // busca de instrução no endereço 0 \\ 
+2 & 9 & // busca de instrução no endereço 9 \\ 
+2 & 4 & // busca de instrução no endereço 4 \\ 
+2 & 1 & // busca de instrução no endereço 1 \\ \hline
+\end{tabular}
+\caption{Exemplo de Trace}
+\label{tab:traceAleatorio}
+\end{table}
+
+Após o entendimento de como utilizar a ferrmamenta, foram traçados alguns casos de teste que comparam resultados para identificar quais as melhores configurações para a memória para que alcance a melhor pertformance dado uma séria de requisitos.
+
+\subsection{Caso de Teste 1 - Melhor arquitetura dado o tamanho dos blocos}
+Afim de explorar a localidade espacial, o objetivo é testar todas as formas de organizar a memória com mesmos tamanhos de blocos, afim de identificar qual é a melhor para blocos muito grandes (ou se a performance é afetada para todas).
+
+\subsection{Caso de Teste 2 - Impacto do aumento da associatividade na memória}
+Nesse teste, o objetivo é aumentar gradativamente a associatividade da cache de N conjuntos, sendo N o número de blocos até 1 conjunto, observando o impacto na performance. Além disso, testar o impacto do aumento dos blocos junto com o aumento dos conjuntos.
+
+\subsection{Caso de Teste 3 - Impacto do tamanho dos blocos em cada modelo de organização}
+Complementar ao Caso de Teste 1, o objetivo desse experimento é analisar individualmente cada uma das formas de orgaizar a cache e entender o impacto na performance na medida que aumentamos o tamanho dos blocos.
+
+\subsection{Caso de Teste 4 - Melhor política de substituição para cada arquitetura}
+Afim de analisar os conflitos na Cache, esse teste visa testar algumas políticas de substituição individualmente em cada arquitetura e definir qual se aplica melhor em cada uma delas.
+
+\subsection{Caso de Teste 5 - Relação entre o aumento dos blocos e as políticas de substituição}
+Nesse teste, o principal objetivo é observar se existe impacto na performance das políticas de substituição caso os blocos tenham seu tamanho aumentado. Para isso, os testes serão realizados apenas na arquitetura de Mapeamento Direto afim de manter conformidade entre os resultados.
+
+A partir desses testes, será possível comparar os resultados de performance, cache miss entre outras métricas afim de chegar em conclusões importantes sobre a exploração das localidades em cada ponto da arquitetura na hora de projetar uma hierarquia de memória.
+
+
+\section{Arquiteturas Propostas}
+Com os casos de teste definidos, é possível projetar as arquiteturas de cada um dos testes, assim como quais propriedades serão constantes em cada teste, quais propriedades se alteram e quais métricas são utilizadas para obter os resultados e conclusões. Afim de não poluir o trabalho, apenas as propriedades constantes e que se alteram serão citadas, enquanto as arquiteturas e traces completos podem ser encontrados no repositório do trabalho.
+
+
+\begin{thebibliography}{00}
+\bibitem{patterson2017} D. A. Patterson and J. L. Hennessy, \textit{Organização e Projeto de Computadores: Interface Hardware/Software}, 4th ed. Rio de Janeiro: Elsevier, 2017.
+\end{thebibliography}
+
+\end{document}
