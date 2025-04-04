@@ -122,7 +122,7 @@ Após o entendimento de como utilizar a ferrmamenta, foram traçados alguns caso
 Afim de explorar a localidade espacial, o objetivo é testar todas as formas de organizar a memória com mesmos tamanhos de blocos, afim de identificar qual é a melhor para blocos muito grandes (ou se a performance é afetada para todas).
 
 \subsection{Caso de Teste 2 - Impacto do aumento da associatividade na memória}
-Nesse teste, o objetivo é aumentar gradativamente a associatividade da cache de N conjuntos, sendo N o número de blocos até 1 conjunto, observando o impacto na performance. Além disso, testar o impacto do aumento dos blocos junto com o aumento dos conjuntos.
+Nesse teste, o objetivo é aumentar gradativamente a associatividade da cache de N conjuntos, sendo N o número de blocos até 1 conjunto, observando o impacto na performance.
 
 \subsection{Caso de Teste 3 - Impacto do tamanho dos blocos em cada modelo de organização}
 Complementar ao Caso de Teste 1, o objetivo desse experimento é analisar individualmente cada uma das formas de orgaizar a cache e entender o impacto na performance na medida que aumentamos o tamanho dos blocos.
@@ -138,6 +138,56 @@ A partir desses testes, será possível comparar os resultados de performance, c
 
 \section{Arquiteturas Propostas}
 Com os casos de teste definidos, é possível projetar as arquiteturas de cada um dos testes, assim como quais propriedades serão constantes em cada teste, quais propriedades se alteram e quais métricas são utilizadas para obter os resultados e conclusões. Afim de não poluir o trabalho, apenas as propriedades constantes e que se alteram serão citadas, enquanto as arquiteturas e traces completos podem ser encontrados no repositório do trabalho.
+
+\subsection{Primeira variação de arquitetura}
+O primeiro teste tem como intuito identificar qual forma de organização da memória cache (Mapeamento direto, Associativo por conjunto e Completamente Associativo) se comporta melhor com o aumento do tamanho dos blocos.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Propriedade}       & \textbf{Valores}         \\ \hline
+Tamanho da Cache           & 256B                    \\ \hline
+Organização                & M.D*, A.C*, C.A*        \\ \hline
+Tamanho da Palavra         & 4B                  \\ \hline
+Palavras por Bloco         & 4, 8, 16                \\ \hline
+Quantidade de Blocos       & 16, 8 e 4           \\ \hline
+Tamanho do Conjunto        & 4 blocos (Para A.C*)    \\ \hline
+\end{tabular}
+\caption{Tabela de Propriedades e Valores}
+\label{tab:propriedades}
+\vspace{0.5cm}
+\footnotesize
+\textbf{Legenda:} M.D = Mapeamento Direto, A.C = Associativo por Conjunto, C.A = Completamente Associativo.
+\end{table}
+
+\subsection{Segunda variação de arquitetura}
+O segundo teste visa observar o impacto do aumento da associatividade na performance da cache, portanto, o tamanho de blocos por conjunto é aumentado gradativamente para analisar as estatísticas.
+\begin{table}[htb]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Propriedade}       & \textbf{Valores}         \\ \hline
+Tamanho da Cache           & 256B                    \\ \hline
+Organização                & A.C*        \\ \hline
+Tamanho da Palavra         & 4B                  \\ \hline
+Palavras por Bloco         & 4                \\ \hline
+Quantidade de Blocos       & 32          \\ \hline
+Tamanho do Conjunto        & 4, 8, 16, 32    \\ \hline
+\end{tabular}
+\caption{Tabela de Propriedades e Valores}
+\label{tab:propriedades}
+\vspace{0.5cm}
+\footnotesize
+\textbf{Legenda:} M.D = Mapeamento Direto, A.C = Associativo por Conjunto, C.A = Completamente Associativo.
+\end{table}
+
+\section{Avaliação dos Resultados}
+Nessa seção, os resultados dos testes realizados anteriormente são comparados e interpretados afim de reunir embasamento suficiente para obter as conclusões propostas.
+
+\subsection{Caso de teste 1}
+
+
 
 
 \begin{thebibliography}{00}
